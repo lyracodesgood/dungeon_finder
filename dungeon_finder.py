@@ -10,13 +10,15 @@ from modules.linked_list import LinkedList
 waiting = LinkedList()#the people wait in here
 keep_going = True
 
+#dictionaries to iterate over for menu choices
+role_classes = dict(zip( (i + 1 for i in range(12)), 
+                    zip(("Ninja", "Warrior", "White Mage",
+           "Bard", "Paladin", "Astrologian",
+           "Red Mage", "Dark Knight", "Scholar",
+           "Samurai", "Gunbreaker", "Sage"), 
+           ("DPS", "Tank", "Healer") * 4))) #the double zip
 
-#OLD DEBUGGING CODE FROM WHEN I WAS USING A QUEUE
-# waiting.enqueue("peter")
-# waiting.enqueue("mary")
-# waiting.enqueue("johnny")
-# print(len(waiting))
-
+#main menu
 menu = {
     1:"Add player to Dungeon Finder",
     2:"Remove a player from Dungeon Finder",
@@ -26,28 +28,42 @@ menu = {
     6:"Quit"
 }
 
+def menu_input(menu, bypass = False):
+    """takes nothing, returns a number corresponding to menu choice"""
+    if bypass == False:
+        for key, value in menu.items():
+            print(f"{key}: {value}")
+    choice = input("Choose a number: ")
+    
+	#input handling
+    try:
+        choice = int(choice)
+    except:
+        print("Error: Input not accepted... ", end = "")
+        return menu_input(bypass = True) #i recurse thee
+    
+    if choice > len(menu):
+        print("Error: Input out of bounds... ", end = "")
+        return menu_input(bypass = True)
+    
+    return choice
+
 #functions
 #1
-def add_player(bypass = False):
-    if bypass == False:
-        print(">----input player data----<")
-    
-    #TODO could do some input validation here
+def add_player():
     chosen_name = input("Player Name: ")
-    chosen_class = input("Player Class: ")
-    chosen_role = input("Player Role: ")
-    
-    new_player = Player(chosen_name, chosen_class, chosen_role)
+    for key, value in role_classes.items():
+        print(f"{key}: {value[0]}, {value[1]}")
+    role_class_key = menu_input(role_classes, bypass = True)
+    new_player = Player(chosen_name, role_classes[role_class_key][0], role_classes[role_class_key][1])
     waiting.append(new_player) #put em in line
 
 #2
-def remove_player(player_name):
-    """removes a player based on their name"""
+def remove_player():
+    """removes a player from the dungeon finder"""
     if len(waiting) == 0:
         print("Error: no one is waiting for a dungeon")
-
     #TODO finish this after we make display players
-
 
     #traverse here
     current_node = waiting.head
@@ -57,6 +73,7 @@ def remove_player(player_name):
             print(f"Removed {current_node}")
 
 #3
+def find_player(player_name):
 
 #4
 def display_waiting():
@@ -70,25 +87,6 @@ def display_waiting():
         print(f"{counter}: {player.data.name} | class: {player.data.job} | Role: {player.data.role}")
         counter += 1
 
-def menu_input(bypass = False):
-    """takes nothing, returns a number corresponding to menu choice"""
-    if bypass == False:
-        print(">----Dungeon Finder----<")
-        for key, value in menu.items():
-            print(f"{key}: {value}")
-    choice = input("Choose a number: ")
-    
-	#input handling
-    try:
-        choice = int(choice)
-    except:
-        print("Error: Input not accepted... ", end = "")
-        return menu_input(bypass = True) #i recurse thee
-    
-    if choice > len(menu):
-        print("Error: Input not accepted... ", end = "")
-        return menu_input(bypass = True) #i recurse thee
-    return choice
 
 def menu_choice(choice):
     """takes a number choice, executes functions corresponding to 
@@ -109,6 +107,7 @@ def menu_choice(choice):
     return True #everything else
 
 
-
+#game loop
 while keep_going:
-    keep_going = menu_choice(menu_input())
+    print("Dungeon Finder --------------------------------------<&&&>")
+    keep_going = menu_choice(menu_input(menu))

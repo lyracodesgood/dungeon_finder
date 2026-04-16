@@ -4,7 +4,7 @@ class Player():
         self.name = name
         self.job = job
         self.role = role
-    
+        
     def __str__(self):
         return f"{self.name}, {self.job}, {self.role}"
     
