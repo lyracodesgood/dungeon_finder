@@ -11,24 +11,23 @@ from random import randint
 waiting = LinkedList()#the people wait in here
 keep_going = True
 
-
+#ff14 is more familiar to me so im gonna use those names
 classes = ("Ninja", "Warrior", "White Mage",
            "Bard", "Paladin", "Astrologian",
            "Red Mage", "Dark Knight", "Scholar",
            "Samurai", "Gunbreaker", "Sage")
 roles = ("DPS", "Tank", "Healer")
 
+#dictionaries to iterate over for menu choices
+#(num,(class, role))
+role_classes = dict(zip( (i + 1 for i in range(12)), zip(classes, roles* 4))) #the double zip w/list comprehension
+
 #for random name generation in player creation
 random_names = Stack()
 with open("misc/player_names.txt") as player_names:
-
     names = player_names.readlines()
     for name in names:
         random_names.push(name)
-
-#dictionaries to iterate over for menu choices
-#(name,(class, role))
-role_classes = dict(zip( (i + 1 for i in range(12)), zip(classes, roles* 4))) #the double zip w/list comprehension
 
 #main menu
 menu = {
@@ -123,9 +122,21 @@ def display_waiting():
         return
     print("Current waiting players:")
     counter = 1
+    #for percentages at end
+    dps = 0
+    tank = 0
+    heal = 0
     for player in waiting:
         print(f"{counter}: {player.data[0]} | Class: {player.data[1]} | Role: {player.data[2]}")
         counter += 1
+        match player.data[2]:
+            case "DPS":
+                dps += 1
+            case "Tank":
+                tank += 1
+            case "Healer":
+                heal += 1
+    print(f"{dps/counter * 100:.2f}% DPS, {tank/counter * 100:.2f}% Tanks, {heal/counter * 100:.2f}% Healers")
 
 #5 count players
 def count_players():
@@ -135,7 +146,8 @@ def count_players():
 def random_player():
     """creates random players"""
     name = random_names.pop()
-    role_class = role_classes[randint(1,12)]
+    role_class = role_classes[randint(1,12)] if randint(1,3) < 3 else role_classes[(randint(0,3) * 3) + 1]
+    
     player = (name.split("\n")[0], role_class[0], role_class[1])
     print(f"adding: {player[0]} | {player[1]} | {player[2]}")
     return player
@@ -153,6 +165,8 @@ def send_dungeon():
              "HEALER":(False,"Empty")}
     for player in waiting:
         #space for DPS
+
+
         #if there is room in either slot and im a dps
         if player.data[2] == "DPS" and (squad["DPS1"][0] == False or squad["DPS2"][0] == False):
             #ternary operator to fill the one we havent filled yet
@@ -228,3 +242,6 @@ def menu_choice(choice):
 while keep_going:
     print("Dungeon Finder --------------------------------------<&&&>")
     keep_going = menu_choice(menu_input(menu))
+    print()
+
+#reflection in reflection.md
